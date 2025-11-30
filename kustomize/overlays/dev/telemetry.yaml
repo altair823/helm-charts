@@ -1,0 +1,16 @@
+apiVersion: telemetry.istio.io/v1alpha1
+kind: Telemetry
+metadata:
+  name: trilium-telemetry
+  namespace: trilium
+spec:
+  accessLogging:
+    - providers:
+        - name: envoy
+  metrics:
+    - providers:
+        - name: prometheus
+  tracing:
+    - providers:
+        - name: zipkin
+

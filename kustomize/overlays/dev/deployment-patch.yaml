@@ -1,0 +1,10 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: trilium
+spec:
+  template:
+    spec:
+      containers:
+        - name: trilium
+          image: triliumnext/trilium:v0.99.5

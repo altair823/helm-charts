@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: trilium-data
+spec:
+  accessModes:
+    - ReadWriteOnce           # 위 PV와 맞춰야 함
+  resources:
+    requests:
+      storage: 20Gi
+  volumeName: trilium-nfs-pv  # 이 PV랑 직접 바인딩
+

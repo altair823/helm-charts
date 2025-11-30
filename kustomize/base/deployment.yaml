@@ -1,0 +1,107 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: trilium
+  labels:
+    app.kubernetes.io/component: main
+    app.kubernetes.io/instance: trilium
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: trilium
+    app.kubernetes.io/version: 0.92.4
+    helm.sh/chart: trilium-1.3.0
+spec:
+  revisionHistoryLimit: 3
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: main
+      app.kubernetes.io/name: trilium
+      app.kubernetes.io/instance: trilium
+  template:
+    metadata:
+      labels: 
+        app.kubernetes.io/component: main
+        app.kubernetes.io/instance: trilium
+        app.kubernetes.io/name: trilium
+    spec: 
+      enableServiceLinks: false
+      serviceAccountName: default
+      automountServiceAccountToken: true
+      hostIPC: false
+      hostNetwork: false
+      hostPID: false
+      dnsPolicy: ClusterFirst
+      initContainers: 
+        - args:
+          - sh
+          - -c
+          - chown -R 1000:1000 /home/node/trilium-data
+          image: busybox:latest
+          name: fixperms
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
+          securityContext:
+            runAsGroup: 0
+            runAsUser: 0
+          volumeMounts:
+          - mountPath: /home/node/trilium-data
+            name: data
+      containers: 
+        - env:
+          - name: key
+            value: value
+          image: triliumnext/notes:v0.95.0
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /login
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 10
+          name: trilium
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /login
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 10
+          resources:
+            requests:
+              cpu: 500m
+              memory: 512Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+          startupProbe:
+            failureThreshold: 10
+            httpGet:
+              path: /login
+              port: 8080
+            initialDelaySeconds: 45
+            periodSeconds: 10
+            timeoutSeconds: 5
+          volumeMounts:
+          - mountPath: /home/node/trilium-data/config.ini
+            name: config
+            subPath: config.ini
+          - mountPath: /home/node/trilium-data
+            name: data
+      volumes: 
+        - configMap:
+            name: trilium-config
+          name: config
+        - name: data
+          persistentVolumeClaim:
+            claimName: trilium-data
+
