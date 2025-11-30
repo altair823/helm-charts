@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: trilium-nfs-pv
+  namespace: trilium
+spec:
+  capacity:
+    storage: 64Gi
+  accessModes:
+    - ReadWriteMany   # 필요하면 ReadWriteMany로 바꿔도 됨
+  persistentVolumeReclaimPolicy: Retain
+  nfs:
+    server: 192.168.0.75        # NFS 서버 IP
+    path: /mnt/hs-nas-zfs/prod-trilium-storage      # export한 경로

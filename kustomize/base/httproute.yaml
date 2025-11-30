@@ -1,0 +1,17 @@
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: HTTPRoute
+metadata:
+  name: trilium
+spec:
+  parentRefs:
+    - name: trilium-gateway
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: trilium
+          namespace: trilium
+          port: 8080
+          weight: 1

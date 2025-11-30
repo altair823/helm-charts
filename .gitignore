@@ -11,3 +11,4 @@ _site/output1.yaml
 output*
 
 *.tgz
+*-desired-manifests.yaml

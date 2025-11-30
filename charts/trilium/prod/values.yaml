@@ -5,6 +5,17 @@
 
 controllers:
   main:
+    replicas: 2
+    affinity:
+      nodeAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            preference:
+              matchExpressions:
+                - key: trilium.io
+                  operator: In
+                  values:
+                    - main-worker
     containers:
       trilium:
         image:
