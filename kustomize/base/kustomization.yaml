@@ -5,4 +5,5 @@ resources:
   - configmap.yaml
   - service.yaml
   - deployment.yaml
-
+  - gateway.yaml
+  - httproute.yaml

@@ -13,4 +13,3 @@ spec:
   tracing:
     - providers:
         - name: zipkin
-

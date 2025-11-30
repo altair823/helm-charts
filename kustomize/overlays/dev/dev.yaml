@@ -200,41 +200,39 @@ spec:
         persistentVolumeClaim:
           claimName: trilium-data
 ---
-apiVersion: networking.istio.io/v1beta1
+apiVersion: gateway.networking.k8s.io/v1beta1
 kind: Gateway
 metadata:
   name: trilium-gateway
   namespace: trilium
 spec:
-  selector:
-    istio: ingressgateway
-  servers:
-  - hosts:
-    - '*'
-    port:
-      name: http
-      number: 80
-      protocol: HTTP
+  gatewayClassName: istio
+  listeners:
+  - allowedRoutes:
+      namespaces:
+        from: All
+    name: http
+    port: 80
+    protocol: HTTP
 ---
-apiVersion: networking.istio.io/v1beta1
-kind: VirtualService
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: HTTPRoute
 metadata:
   name: trilium
   namespace: trilium
 spec:
-  gateways:
-  - trilium-gateway
-  hosts:
-  - '*'
-  http:
-  - match:
-    - uri:
-        prefix: /
-    route:
-    - destination:
-        host: trilium
-        port:
-          number: 8080
+  parentRefs:
+  - name: trilium-gateway
+  rules:
+  - backendRefs:
+    - name: trilium
+      namespace: trilium
+      port: 8080
+      weight: 1
+    matches:
+    - path:
+        type: PathPrefix
+        value: /
 ---
 apiVersion: telemetry.istio.io/v1alpha1
 kind: Telemetry

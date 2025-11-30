@@ -71,7 +71,7 @@ metadata:
   name: trilium-nfs-pv
 spec:
   accessModes:
-  - ReadWriteMany
+  - ReadWriteOnce
   capacity:
     storage: 64Gi
   nfs:
@@ -86,7 +86,7 @@ metadata:
   namespace: trilium
 spec:
   accessModes:
-  - ReadWriteMany
+  - ReadWriteOnce
   resources:
     requests:
       storage: 64Gi
@@ -105,7 +105,7 @@ metadata:
   name: trilium
   namespace: trilium
 spec:
-  replicas: 2
+  replicas: 1
   revisionHistoryLimit: 3
   selector:
     matchLabels:
@@ -209,3 +209,53 @@ spec:
       - name: data
         persistentVolumeClaim:
           claimName: trilium-data
+---
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: Gateway
+metadata:
+  name: trilium-gateway
+  namespace: trilium
+spec:
+  gatewayClassName: istio
+  listeners:
+  - allowedRoutes:
+      namespaces:
+        from: All
+    name: http
+    port: 80
+    protocol: HTTP
+---
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: HTTPRoute
+metadata:
+  name: trilium
+  namespace: trilium
+spec:
+  parentRefs:
+  - name: trilium-gateway
+  rules:
+  - backendRefs:
+    - name: trilium
+      namespace: trilium
+      port: 8080
+      weight: 1
+    matches:
+    - path:
+        type: PathPrefix
+        value: /
+---
+apiVersion: telemetry.istio.io/v1alpha1
+kind: Telemetry
+metadata:
+  name: trilium-telemetry
+  namespace: trilium
+spec:
+  accessLogging:
+  - providers:
+    - name: envoy
+  metrics:
+  - providers:
+    - name: prometheus
+  tracing:
+  - providers:
+    - name: zipkin
